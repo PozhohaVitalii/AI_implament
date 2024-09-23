@@ -43,17 +43,23 @@ namespace AI_implament
 
         private void button3_Click(object sender, EventArgs e)
         {
+            int minj = 0;
+            int mini = 0;
+            int maxj = 0;
+            int maxi = 0;
+
             try
             {
                 SectorsCount = int.Parse(textBox1.Text);
             }
             catch { }
             if (SectorsCount != 0)
-            {   double sectorAngle  = 90 / SectorsCount;
-                BlackBox = new Class2();
-                BlackBox.Add(ImageExempl);
+            {   double sectorAngle  = 90.0 / SectorsCount;
                 int CountOfBlackPoints = 0;
                 color = GetPixelArray(ImageExempl);
+                mini = color.GetLength(0);
+                minj = color.GetLength(1);
+
                 for (int i = 0; i < color.GetLength(0); i++)
                 {
                     for (int j = 0; j < color.GetLength(1); j++)
@@ -67,6 +73,10 @@ namespace AI_implament
                         {
                             gray = 1;
                             CountOfBlackPoints++;
+                            mini = mini < i ? mini : i;
+                            minj = minj < j ? minj : j;
+                            maxi = maxi > i ? maxi : i;
+                            maxj = maxj > j ? maxj : j;
                         }
                         double hipotenusa = Math.Sqrt(Math.Pow(color.GetLength(0)-i, 2) + Math.Pow(j, 2));
                         double angle = Math.Asin((double)j / hipotenusa) * (180.0 / Math.PI);
@@ -79,20 +89,37 @@ namespace AI_implament
                         while (angle > n * sectorAngle);
                         if (gray == 255)
                         {
-                            gray = gray - n * 7;
+
+                            int m = 7;
+                            if (SectorsCount < 8) m = 17;
+                            gray = gray - n * m;
                         }
-                        else
-                        {
-                            gray = gray + n * 7;
-                        }
+                        
                         BlackWhite.SetPixel(i, j, Color.FromArgb(255, gray, gray, gray));
                     }
                 }
                 richTextBox1.Text += "Count of black points on image: " + CountOfBlackPoints.ToString() + "\n";
+                textBox1.Text = sectorAngle.ToString("F4");
+                using (Graphics g = Graphics.FromImage(BlackWhite))
+                {
+                    Pen pen = new Pen(Color.Lime, 1);
+                    g.DrawRectangle(pen, mini, minj, maxi - mini, maxj - minj);
+                    pen.Dispose();
+                }
                 pictureBox1.Image = BlackWhite;
                 pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+                BlackBox = new Class2();
+                Rectangle part = new Rectangle(mini, minj, maxi - mini, maxj - minj);
+                Bitmap clonedBitmap = ClonePartOfBitmap(ImageExempl, part);
+                BlackBox.Add(clonedBitmap);
             }
         }
+        public Bitmap ClonePartOfBitmap(Bitmap sourceBitmap, Rectangle section)
+        {
+            // Clone the specified section of the bitmap.
+            return sourceBitmap.Clone(section, sourceBitmap.PixelFormat);
+        }
+
 
         public string getTextBox1()
         {

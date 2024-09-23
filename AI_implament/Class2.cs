@@ -60,11 +60,12 @@ namespace AI_implament
                     this.SectorCount = Form2.SectorsCount;
                     if (this.SectorCount == 0) { throw new Exception("ADD SECTORS"); }
                     Sectors = new int[bitmapArray.Count(), SectorCount];
+                    
                 }
                 catch (Exception e) {
                     Console.WriteLine(e.Message);
                 }
-                double sectorAngle = 90 / SectorCount;
+                double sectorAngle = 90.0 / SectorCount;
                 for (int e = 0; e < BlackPixels.Count(); e++)
                 {
                     for (int i = 0; i < BlackPixels[e].GetLength(0); i++)
@@ -74,13 +75,14 @@ namespace AI_implament
                             if (BlackPixels[e][i, j])
                             {
                                 double hipotenusa = Math.Sqrt(Math.Pow(BlackPixels[e].GetLength(0) - i, 2) + Math.Pow(j, 2));
-                                double angle = Math.Asin(j / hipotenusa) * (180.0 / Math.PI)+2; 
+                                double angle = Math.Asin(j / hipotenusa) * (180.0 / Math.PI); 
                                 int n = 0;
                                 do
                                 {
                                     n++;
                                 }
                                 while (angle > n * sectorAngle);
+                                if (n > Sectors.GetLength(1)) throw new Exception(" Its Greater"+ Sectors.GetLength(1).ToString() + n.ToString());
                                 Sectors[e, n-1] += 1;
                             }
                         }
