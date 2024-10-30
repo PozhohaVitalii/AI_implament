@@ -37,6 +37,9 @@
             button3 = new Button();
             button4 = new Button();
             textBox1 = new TextBox();
+            button5 = new Button();
+            button6 = new Button();
+            button7 = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -113,14 +116,54 @@
             textBox1.TabIndex = 6;
             textBox1.Text = "Sectors Count";
             textBox1.TextAlign = HorizontalAlignment.Center;
+            textBox1.Click += textBox1_Click;
             textBox1.TextChanged += textBox1_TextChanged;
             textBox1.Enter += textBox1_Enter;
+            textBox1.Leave += textBox1_Leave;
+            textBox1.MouseLeave += textBox1_MouseLeave;
+            textBox1.MouseHover += textBox1_MouseHover;
+            // 
+            // button5
+            // 
+            button5.Font = new Font("Stencil", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            button5.Location = new Point(904, 487);
+            button5.Name = "button5";
+            button5.Size = new Size(115, 60);
+            button5.TabIndex = 7;
+            button5.Text = "Recognise";
+            button5.UseVisualStyleBackColor = true;
+            button5.Click += button5_Click;
+            // 
+            // button6
+            // 
+            button6.Font = new Font("Stencil", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            button6.Location = new Point(904, 431);
+            button6.Name = "button6";
+            button6.Size = new Size(115, 50);
+            button6.TabIndex = 8;
+            button6.Text = "DISttance";
+            button6.UseVisualStyleBackColor = true;
+            button6.Click += button6_Click;
+            // 
+            // button7
+            // 
+            button7.Font = new Font("Stencil", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            button7.Location = new Point(904, 375);
+            button7.Name = "button7";
+            button7.Size = new Size(115, 50);
+            button7.TabIndex = 9;
+            button7.Text = "Drawing";
+            button7.UseVisualStyleBackColor = true;
+            button7.Click += button7_Click;
             // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1079, 600);
+            Controls.Add(button7);
+            Controls.Add(button6);
+            Controls.Add(button5);
             Controls.Add(textBox1);
             Controls.Add(button4);
             Controls.Add(button3);
@@ -146,5 +189,8 @@
         private Button button3;
         private Button button4;
         public TextBox textBox1;
+        private Button button5;
+        private Button button6;
+        private Button button7;
     }
 }

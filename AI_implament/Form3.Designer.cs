@@ -28,12 +28,40 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form3";
+            button1 = new Button();
+            openFileDialog1 = new OpenFileDialog();
+            SuspendLayout();
+            // 
+            // button1
+            // 
+            button1.Font = new Font("Stencil", 18F, FontStyle.Bold, GraphicsUnit.Point);
+            button1.Location = new Point(77, 73);
+            button1.Name = "button1";
+            button1.Size = new Size(63, 55);
+            button1.TabIndex = 0;
+            button1.Text = "+";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
+            // openFileDialog1
+            // 
+            openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // Form3
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(button1);
+            Name = "Form3";
+            Text = "Form3";
+            Load += Form3_Load;
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Button button1;
+        private OpenFileDialog openFileDialog1;
     }
 }

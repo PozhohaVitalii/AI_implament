@@ -7,18 +7,19 @@ using System.Threading.Tasks;
 
 namespace AI_implament
 {
-    internal class Class2
+    public class Class2
     {
         // Одновимірний динамічний масив Bitmap
         private List<Bitmap> bitmapArray = new List<Bitmap>();
         private List<Bitmap> BlackWhite = new List<Bitmap>();
         bool toGetBlackWhite = false;
-        public int[] classLowLimit;
-        public int[] classHighLimit;
+        public double[] classLowLimit;
+        public double[] classHighLimit;
         public int SectorCount = 0;
         private List<bool[,]> BlackPixels = new List<bool[,]>();
         private int[,] Sectors;
-        public int CountOfBlackPoints = 0;
+        private double[,] SectorsS;
+        public int [] CountOfBlackPoints;
         public void calcFirst()
         {
             if (bitmapArray.Count != 0)
@@ -29,7 +30,7 @@ namespace AI_implament
                 foreach (Bitmap elem in bitmapArray) img1.Add(Form2.GetPixelArray(elem));
 
 
-               
+               CountOfBlackPoints  = new int[img1.Count];
                 for (int e = 0; e < img1.Count(); e++)
                 {
                     BlackPixels.Add(new bool[img1[e].GetLength(0), img1[e].GetLength(1)]);
@@ -47,8 +48,8 @@ namespace AI_implament
                             else
                             {
                                 gray = 1;
-                                CountOfBlackPoints++;
-                                BlackPixels[e][i, j] = true;
+                               CountOfBlackPoints[e]++;
+                               BlackPixels[e][i, j] = true;
                             }
                             BlackWhite[e].SetPixel(i, j, Color.FromArgb(255, gray, gray, gray));
                         }
@@ -59,12 +60,13 @@ namespace AI_implament
                 {
                     this.SectorCount = Form2.SectorsCount;
                     if (this.SectorCount == 0) { throw new Exception("ADD SECTORS"); }
-                    Sectors = new int[bitmapArray.Count(), SectorCount];
+                    Sectors = new int[img1.Count(), SectorCount];
                     
                 }
                 catch (Exception e) {
                     Console.WriteLine(e.Message);
                 }
+                SectorsS = new double[img1.Count(), SectorCount];
                 double sectorAngle = 90.0 / SectorCount;
                 for (int e = 0; e < BlackPixels.Count(); e++)
                 {
@@ -87,26 +89,36 @@ namespace AI_implament
                             }
                         }
                     }
-                }
-                
-                classHighLimit = new int[SectorCount];
-                classLowLimit = new int[SectorCount];
-
-                for (int j = 0; j < Sectors.GetLength(1); j++)
-                {
-                    int min = Sectors[0, j], max = Sectors[0, j];
-                    for (int i = 0; i < Sectors.GetLength(0); i++)
+                    for (int i = 0; i < SectorCount; i++)
                     {
-                        if (Sectors[i, j] < min)
-                        {
-                            min = Sectors[i, j];
-                        }
-                        if (Sectors[i, j] > max)
-                        {
-                            max = Sectors[i, j];
-                        }                    
                         
+                        SectorsS[e, i] = 
+                            (double)Sectors[e, i] / 
+                            (double)CountOfBlackPoints[e];
+                       
                     }
+                }
+
+                classHighLimit = new double[SectorCount];
+                classLowLimit = new double[SectorCount];
+
+                for (int j = 0; j < SectorsS.GetLength(1); j++)
+                {
+                    double min = SectorsS[0, j], max = SectorsS[0, j];
+
+                    for (int i = 0; i < SectorsS.GetLength(0); i++)
+                    {
+                        if (SectorsS[i, j] < min)
+                        {
+                            min = SectorsS[i, j];
+                        }
+                        if (SectorsS[i, j] > max)
+                        {
+                            max = SectorsS[i, j];
+                        }
+
+                    }
+
                     classLowLimit[j] = min;
                     classHighLimit[j] = max;
                 }
@@ -160,5 +172,17 @@ namespace AI_implament
             return Sectors;
         }
 
+        public double[] getLowLimit()
+        {
+            return classLowLimit;
+        }
+        public double[] getHighLimit()
+        {
+            return classHighLimit;
+        }
+        public int[] getCountOfBlackPoints()
+        {
+            return CountOfBlackPoints;
+        }
     }
 }
