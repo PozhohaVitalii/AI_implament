@@ -171,6 +171,10 @@ namespace AI_implament
         public int[,] getSector() {
             return Sectors;
         }
+        public double[,] getSectorS()
+        {
+            return SectorsS;
+        }
 
         public double[] getLowLimit()
         {

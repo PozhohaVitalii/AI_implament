@@ -17,6 +17,7 @@ namespace AI_implament
         public int NumbOFclasses = 0;
         public Bitmap ImageExempl;
         public Bitmap BlackWhite;
+        public MLP mlp;
         Color[,] color;
         Color[,] colorBW;
         public static int SectorsCount;
@@ -24,6 +25,8 @@ namespace AI_implament
         Class2 BlackBox;
         List<Form> classForm = new List<Form>();
         Form drawingForm = new Form4();
+        Form NeuroForm0 = new Form5();
+        Form NeuroForm1 = new Form6();
         List<Button> buttons = new List<Button>();
 
         public Form2()
@@ -235,7 +238,7 @@ namespace AI_implament
                 buttons.Add(new Button());
                 buttons[i].Text = "CLASS " + (i).ToString();
                 buttons[i].Size = new System.Drawing.Size(115, 30);
-                buttons[i].Location = new System.Drawing.Point(904, 213 + i * 40);
+                buttons[i].Location = new System.Drawing.Point(904, 83 + i * 40);
 
                 if (i != ClassesBlackBox.Count - 1)
                 {
@@ -478,6 +481,220 @@ namespace AI_implament
         private void button7_Click(object sender, EventArgs e)
         {
             drawingForm.ShowDialog();
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            NeuroForm0.ShowDialog();
+        }
+        public static double[][] ConvertToJaggedArray(double[,] array2D)
+        {
+            int rows = array2D.GetLength(0);
+            int cols = array2D.GetLength(1);
+            double[][] jaggedArray = new double[rows][];
+
+            for (int i = 0; i < rows; i++)
+            {
+                jaggedArray[i] = new double[cols];
+                for (int j = 0; j < cols; j++)
+                {
+                    jaggedArray[i][j] = array2D[i, j];
+                }
+            }
+
+            return jaggedArray;
+        }
+        public static double[][] CombineByRows(double[][] array1, double[][] array2)
+        {
+            int rows1 = array1.Length;
+            int rows2 = array2.Length;
+            int totalRows = rows1 + rows2;
+            int cols = array1[0].Length;
+
+            double[][] result = new double[totalRows][];
+
+            // Copy rows from the first array
+            for (int i = 0; i < rows1; i++)
+            {
+                result[i] = new double[cols];
+                Array.Copy(array1[i], result[i], cols);
+            }
+
+            // Copy rows from the second array
+            for (int i = 0; i < rows2; i++)
+            {
+                result[rows1 + i] = new double[cols];
+                Array.Copy(array2[i], result[rows1 + i], cols);
+            }
+
+            return result;
+        }
+
+        public void DisplayArrayInRichTextBox(double[][] array, RichTextBox richTextBox)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var row in array)
+            {
+                sb.AppendLine(string.Join("\t", row)); // Join each element in the row with tabs for formatting
+            }
+
+            richTextBox.Text += sb.ToString();
+        }
+        public static double[][] ConvertListToJaggedArray(List<int> list)
+        {
+            // Find the maximum value in the list to set the size of each inner array
+            int maxValue = list.Max();
+            double[][] result = new double[list.Count][];
+
+            // Create each row with '1' at the specified index, all other elements set to '0'
+            for (int i = 0; i < list.Count; i++)
+            {
+                result[i] = new double[maxValue + 1]; // Inner array size is equal to maxValue
+                int index = list[i];          // Place '1' at the index corresponding to the list value
+                result[i][index] = 1;
+            }
+
+            return result;
+        }
+
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if (BlackBox.CountOfBlackPoints[0] == null)
+            {
+                BlackBox.calcFirst();
+            }
+            for (int t = 0; t < ClassesBlackBox.Count; t++)
+            {
+                if (ClassesBlackBox[t].CountOfBlackPoints[0] == null)
+                {
+                    ClassesBlackBox[t].calcFirst();
+                }
+            }
+
+
+
+            double[,] SignsVector = BlackBox.getSectorS();
+            double[][] oblSectors = ConvertToJaggedArray(SignsVector);
+            //DisplayArrayInRichTextBox(oblSectors, richTextBox1);
+
+            List<int> list = new List<int>();
+            double[][] classes = ConvertToJaggedArray(ClassesBlackBox[0].getSectorS());
+            for (int j = list.Count; j < classes.Length; j++)
+            {
+                list.Add(0);
+            }
+            for (int i = 1; i < ClassesBlackBox.Count; i++)
+            {
+                classes = CombineByRows(classes, ConvertToJaggedArray(ClassesBlackBox[i].getSectorS()));
+                for (int j = list.Count; j < classes.Length; j++)
+                {
+                    list.Add(i);
+                }
+            }
+            // DisplayArrayInRichTextBox(classes, richTextBox1);
+
+
+
+
+            // NeuroForm1.ShowDialog();
+            int inputSize = SectorsCount;
+            int hiddenSize = SectorsCount;
+            int outputSize = ClassesBlackBox.Count;
+            double learningRate = 0.1;
+
+            mlp = new MLP(inputSize, hiddenSize, outputSize, learningRate);
+
+
+            // Вхідні дані (наприклад, логічна функція AND)
+            double[][] inputs = classes;
+
+            // Очікувані результати для функції AND
+            double[][] targets = ConvertListToJaggedArray(list);
+
+            //DisplayArrayInRichTextBox(targets, richTextBox1);
+            // Навчання моделі
+            int epochs = 5000;
+            mlp.Train(inputs, targets, epochs);
+
+            // Тестування на нових даних
+            richTextBox1.Text += "\n\n\nTesting MLP on classification :\n";
+        
+            richTextBox1.Text += "Neurons output\n";
+            for (int i = 0; i < oblSectors.Length; i++)
+            {
+                double[] output = mlp.Predict(oblSectors[i]);
+                foreach (double a in output)
+                {
+                    richTextBox1.Text += a.ToString("F1") + " ";
+                }
+                richTextBox1.Text += "\n";
+            }
+
+
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            BlackBox.calcFirst();
+            double[,] SignsVector = BlackBox.getSectorS();
+            double[][] oblSectors = ConvertToJaggedArray(SignsVector);
+            DisplayArrayInRichTextBox(oblSectors, richTextBox1);
+
+            richTextBox1.Text += "\n\n";
+            richTextBox1.Text += "Neurons output \n";
+            for (int i = 0; i < oblSectors.Length; i++)
+            {
+                double[] output = mlp.Predict(oblSectors[i]);
+                foreach (double a in output)
+                {
+                    richTextBox1.Text += a.ToString("F1") + " ";
+                }
+                richTextBox1.Text += "\n";
+            }
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            // Define a network with 2 inputs, one hidden layer of 3 neurons, and 1 output neuron
+            // Define the XOR dataset
+            double[][] inputs = new double[][]
+            {
+            new double[] { 0, 0 },
+            new double[] { 0, 1 },
+            new double[] { 1, 0 },
+            new double[] { 1, 1 }
+            };
+
+            double[][] expectedOutputs = new double[][]
+            {
+            new double[] { 0 },
+            new double[] { 0 },
+            new double[] { 0 },
+            new double[] { 1 }
+            };
+
+            // Initialize the MLP with 2 input neurons, 2 hidden neurons, and 1 output neuron
+            int inputSize = 2;
+            int hiddenSize = 2;
+            int outputSize = 1;
+            double learningRate = 0.1;
+
+            MLP mlp = new MLP(inputSize, hiddenSize, outputSize, learningRate);
+
+            // Train the MLP
+            int epochs = 100000;
+            mlp.Train(inputs, expectedOutputs, epochs);
+
+            // Test the trained MLP on the XOR dataset
+            Console.WriteLine("Testing on XOR dataset:");
+            foreach (var input in inputs)
+            {
+                double[] output = mlp.Predict(input);
+                richTextBox1.Text += $"Input: {input[0]}, {input[1]} => Predicted Output: {output[0]:F4}";
+            }
         }
     }
 }
